@@ -1,0 +1,65 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "revive",
+      "request": "launch",
+      "name": "Debug Solidity — Dual VM (REVM + PolkaVM)",
+      "contractFile": "${file}",
+      "backend": "BOTH",
+      "autoStartNode": true,
+      "ethRpcUrl": "http://localhost:8545",
+      "substrateUrl": "ws://localhost:9944",
+      "nodePath": "revive-dev-node",
+      "ethRpcPath": "pallet-revive-eth-rpc",
+      "resolcPath": "resolc",
+      "solcPath": "solc",
+      "constructorArgs": [],
+      "trace": false
+    },
+    {
+      "type": "revive",
+      "request": "launch",
+      "name": "Debug Solidity — REVM (EVM only)",
+      "contractFile": "${file}",
+      "backend": "REVM",
+      "autoStartNode": true,
+      "ethRpcUrl": "http://localhost:8545",
+      "substrateUrl": "ws://localhost:9944",
+      "nodePath": "revive-dev-node",
+      "ethRpcPath": "pallet-revive-eth-rpc",
+      "solcPath": "solc",
+      "constructorArgs": []
+    },
+    {
+      "type": "revive",
+      "request": "launch",
+      "name": "Debug Solidity — PolkaVM (PVM only)",
+      "contractFile": "${file}",
+      "backend": "PVM",
+      "autoStartNode": true,
+      "ethRpcUrl": "http://localhost:8545",
+      "substrateUrl": "ws://localhost:9944",
+      "nodePath": "revive-dev-node",
+      "ethRpcPath": "pallet-revive-eth-rpc",
+      "resolcPath": "resolc",
+      "solcPath": "solc",
+      "constructorArgs": []
+    },
+    {
+      "type": "revive",
+      "request": "launch",
+      "name": "Debug Counter.sol — Dual VM (with args)",
+      "contractFile": "${workspaceFolder}/examples/Counter.sol",
+      "backend": "BOTH",
+      "autoStartNode": true,
+      "constructorArgs": [0, 1],
+      "ethRpcUrl": "http://localhost:8545",
+      "substrateUrl": "ws://localhost:9944",
+      "nodePath": "revive-dev-node",
+      "ethRpcPath": "pallet-revive-eth-rpc",
+      "resolcPath": "resolc",
+      "solcPath": "solc"
+    }
+  ]
+}

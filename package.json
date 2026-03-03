@@ -1,0 +1,275 @@
+{
+  "name": "revive-dual-debugger",
+  "displayName": "ReviveDualDebugger",
+  "description": "Dual-VM debugger for Polkadot Revive pallet — REVM (EVM) and PolkaVM (RISC-V) side-by-side with Gas vs Weight comparison",
+  "version": "0.1.0",
+  "publisher": "polkadot-tools, Sage Senpeak",
+  "icon": "media/revive-icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Debuggers", "Other"],
+  "keywords": ["polkadot", "solidity", "revive", "polkavm", "evm", "debugging", "blockchain", "substrate"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sage-senpeak/revive-dual-debugger"
+  },
+  "activationEvents": [
+    "onDebugResolve:revive",
+    "onDebugDynamicConfigurations:revive",
+    "onCommand:revive.switchToREVM",
+    "onCommand:revive.switchToPVM",
+    "onCommand:revive.deployAndDebug",
+    "onCommand:revive.openDualTrace",
+    "onCommand:revive.compileContract",
+    "onCommand:revive.startNode",
+    "onCommand:revive.stopNode"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "revive.switchToREVM",
+        "title": "Revive: Switch to REVM (EVM) Backend",
+        "icon": "$(flame)"
+      },
+      {
+        "command": "revive.switchToPVM",
+        "title": "Revive: Switch to PolkaVM (PVM) Backend",
+        "icon": "$(circuit-board)"
+      },
+      {
+        "command": "revive.deployAndDebug",
+        "title": "Revive: One-Click Deploy & Debug",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "revive.openDualTrace",
+        "title": "Revive: Open Dual-VM Trace View",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "revive.compileContract",
+        "title": "Revive: Compile Solidity Contract",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "revive.startNode",
+        "title": "Revive: Start Local Dev Node",
+        "icon": "$(play)"
+      },
+      {
+        "command": "revive.stopNode",
+        "title": "Revive: Stop Local Dev Node",
+        "icon": "$(stop)"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "revive",
+        "label": "Revive Dual Debugger",
+        "program": "./dist/debugAdapter.js",
+        "runtime": "node",
+        "languages": ["solidity"],
+        "configurationAttributes": {
+          "launch": {
+            "required": ["contractFile"],
+            "properties": {
+              "contractFile": {
+                "type": "string",
+                "description": "Path to the Solidity contract file to debug",
+                "default": "${file}"
+              },
+              "backend": {
+                "type": "string",
+                "enum": ["REVM", "PVM", "BOTH"],
+                "description": "Execution backend: REVM (EVM), PVM (PolkaVM), or BOTH for dual trace",
+                "default": "BOTH"
+              },
+              "ethRpcUrl": {
+                "type": "string",
+                "description": "Ethereum JSON-RPC endpoint (eth-rpc adapter)",
+                "default": "http://localhost:8545"
+              },
+              "substrateUrl": {
+                "type": "string",
+                "description": "Substrate WebSocket RPC endpoint",
+                "default": "ws://localhost:9944"
+              },
+              "nodePath": {
+                "type": "string",
+                "description": "Path to revive-dev-node binary",
+                "default": "revive-dev-node"
+              },
+              "ethRpcPath": {
+                "type": "string",
+                "description": "Path to pallet-revive-eth-rpc binary",
+                "default": "pallet-revive-eth-rpc"
+              },
+              "resolcPath": {
+                "type": "string",
+                "description": "Path to resolc compiler",
+                "default": "resolc"
+              },
+              "solcPath": {
+                "type": "string",
+                "description": "Path to solc compiler",
+                "default": "solc"
+              },
+              "constructorArgs": {
+                "type": "array",
+                "description": "Constructor arguments for contract deployment",
+                "default": []
+              },
+              "autoStartNode": {
+                "type": "boolean",
+                "description": "Automatically start the local dev node",
+                "default": true
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "Enable verbose trace logging",
+                "default": false
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "revive",
+            "request": "launch",
+            "name": "Debug Solidity (Dual VM)",
+            "contractFile": "${file}",
+            "backend": "BOTH",
+            "autoStartNode": true
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Revive: Debug Solidity (Dual VM)",
+            "description": "Debug a Solidity contract on both REVM and PolkaVM",
+            "body": {
+              "type": "revive",
+              "request": "launch",
+              "name": "Debug Solidity (Dual VM)",
+              "contractFile": "^\"\\${file}\"",
+              "backend": "BOTH",
+              "autoStartNode": true
+            }
+          },
+          {
+            "label": "Revive: Debug Solidity (REVM only)",
+            "description": "Debug a Solidity contract on REVM (EVM compatibility)",
+            "body": {
+              "type": "revive",
+              "request": "launch",
+              "name": "Debug Solidity (REVM)",
+              "contractFile": "^\"\\${file}\"",
+              "backend": "REVM",
+              "autoStartNode": true
+            }
+          },
+          {
+            "label": "Revive: Debug Solidity (PolkaVM only)",
+            "description": "Debug a Solidity contract on PolkaVM (RISC-V native)",
+            "body": {
+              "type": "revive",
+              "request": "launch",
+              "name": "Debug Solidity (PVM)",
+              "contractFile": "^\"\\${file}\"",
+              "backend": "PVM",
+              "autoStartNode": true
+            }
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "ReviveDualDebugger",
+      "properties": {
+        "revive.nodePath": {
+          "type": "string",
+          "default": "revive-dev-node",
+          "description": "Path to the revive-dev-node binary"
+        },
+        "revive.ethRpcPath": {
+          "type": "string",
+          "default": "pallet-revive-eth-rpc",
+          "description": "Path to the pallet-revive-eth-rpc binary"
+        },
+        "revive.resolcPath": {
+          "type": "string",
+          "default": "resolc",
+          "description": "Path to the resolc Solidity-to-RISC-V compiler"
+        },
+        "revive.solcPath": {
+          "type": "string",
+          "default": "solc",
+          "description": "Path to the solc Solidity compiler"
+        },
+        "revive.defaultBackend": {
+          "type": "string",
+          "enum": ["REVM", "PVM", "BOTH"],
+          "default": "BOTH",
+          "description": "Default execution backend for new debug sessions"
+        },
+        "revive.ethRpcPort": {
+          "type": "number",
+          "default": 8545,
+          "description": "Port for the Ethereum JSON-RPC adapter"
+        },
+        "revive.substratePort": {
+          "type": "number",
+          "default": 9944,
+          "description": "Port for the Substrate WebSocket RPC"
+        }
+      }
+    },
+    "views": {
+      "debug": [
+        {
+          "id": "revive.weightMeterView",
+          "name": "Revive Weight Meter",
+          "when": "debugType == 'revive'"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "revive.compileContract",
+          "when": "resourceLangId == solidity",
+          "group": "revive@1"
+        },
+        {
+          "command": "revive.deployAndDebug",
+          "when": "resourceLangId == solidity",
+          "group": "revive@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "webpack --mode production",
+    "watch": "webpack --mode development --watch",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@types/ws": "^8.5.10",
+    "@types/webpack": "^5.28.5",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@vscode/debugadapter": "^1.65.0",
+    "@vscode/debugprotocol": "^1.65.0",
+    "axios": "^1.6.7",
+    "ws": "^8.16.0"
+  }
+}
