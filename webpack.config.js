@@ -2,6 +2,13 @@
 'use strict';
 
 const path = require('path');
+const webpack = require('webpack');
+
+// Suppress warnings for optional ws native addons (bufferutil, utf-8-validate).
+// ws falls back gracefully without them — no functionality is lost.
+const ignoreOptionalWsDeps = new webpack.IgnorePlugin({
+  resourceRegExp: /^(bufferutil|utf-8-validate)$/
+});
 
 /** @type {import('webpack').Configuration[]} */
 const config = [
@@ -31,6 +38,7 @@ const config = [
         }
       ]
     },
+    plugins: [ignoreOptionalWsDeps],
     devtool: 'nosources-source-map',
     infrastructureLogging: { level: 'log' }
   },
@@ -59,6 +67,7 @@ const config = [
         }
       ]
     },
+    plugins: [ignoreOptionalWsDeps],
     devtool: 'nosources-source-map'
   }
 ];

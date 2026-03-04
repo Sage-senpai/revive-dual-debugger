@@ -250,9 +250,10 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "webpack --mode production",
-    "watch": "webpack --mode development --watch",
+    "vscode:prepublish": "npm run compile:dev",
+    "compile": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode production",
+    "compile:dev": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode development",
+    "watch": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode development --watch",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
   },
