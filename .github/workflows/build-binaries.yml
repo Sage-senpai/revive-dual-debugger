@@ -1,0 +1,44 @@
+name: Build Polkadot Revive Binaries
+
+on:
+  workflow_dispatch:   # Run manually from GitHub Actions tab
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-revive
+
+      - name: Clone polkadot-sdk
+        run: |
+          git clone --depth 1 https://github.com/paritytech/polkadot-sdk.git
+          cd polkadot-sdk
+
+      - name: Build revive-dev-node
+        working-directory: polkadot-sdk
+        run: cargo build -p revive-dev-node --release
+        timeout-minutes: 90
+
+      - name: Build pallet-revive-eth-rpc
+        working-directory: polkadot-sdk
+        run: cargo build -p pallet-revive-eth-rpc --release
+        timeout-minutes: 30
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: revive-binaries-windows
+          path: |
+            polkadot-sdk/target/release/revive-dev-node.exe
+            polkadot-sdk/target/release/pallet-revive-eth-rpc.exe
+          retention-days: 7
