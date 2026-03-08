@@ -35,8 +35,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y llvm-dev libclang-dev clang protobuf-compiler cmake pkg-config libssl-dev
-          echo "LIBCLANG_PATH=/usr/lib/llvm-14/lib" >> $GITHUB_ENV
+          CLANG_LIB=$(dirname $(find /usr/lib -name 'libclang.so*' | head -n1))
+          echo "LIBCLANG_PATH=$CLANG_LIB" >> $GITHUB_ENV
           echo "LLVM_CONFIG_PATH=$(which llvm-config)" >> $GITHUB_ENV
+          echo "Found libclang at: $CLANG_LIB"
 
       - name: Use stable Rust (pre-installed)
         run: |
