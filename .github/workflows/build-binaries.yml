@@ -31,6 +31,13 @@ jobs:
           key: cargo-revive-${{ hashFiles('polkadot-sdk/Cargo.lock') }}
           restore-keys: cargo-revive-
 
+      - name: Install LLVM, Clang, and build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y llvm-dev libclang-dev clang protobuf-compiler cmake pkg-config libssl-dev
+          echo "LIBCLANG_PATH=/usr/lib/llvm-14/lib" >> $GITHUB_ENV
+          echo "LLVM_CONFIG_PATH=$(which llvm-config)" >> $GITHUB_ENV
+
       - name: Use stable Rust (pre-installed)
         run: |
           rustup default stable
