@@ -1,28 +1,40 @@
 name: Build Polkadot Revive Binaries
 
 on:
-  workflow_dispatch:   # Run manually from GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build-linux:
+    runs-on: ubuntu-latest
     steps:
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost \
+                      /usr/share/swift /usr/local/lib/android
+          sudo apt-get clean
+          df -h
 
-      - name: Cache Cargo
+      - name: Checkout polkadot-sdk (shallow)
+        uses: actions/checkout@v4
+        with:
+          repository: paritytech/polkadot-sdk
+          path: polkadot-sdk
+          fetch-depth: 1
+
+      - name: Cache Cargo registry
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-revive
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: cargo-revive-${{ hashFiles('polkadot-sdk/Cargo.lock') }}
+          restore-keys: cargo-revive-
 
-      - name: Clone polkadot-sdk
+      - name: Use stable Rust (pre-installed)
         run: |
-          git clone --depth 1 https://github.com/paritytech/polkadot-sdk.git
-          cd polkadot-sdk
+          rustup default stable
+          rustup show
 
       - name: Build revive-dev-node
         working-directory: polkadot-sdk
@@ -34,11 +46,17 @@ jobs:
         run: cargo build -p pallet-revive-eth-rpc --release
         timeout-minutes: 30
 
-      - name: Upload binaries
+      - name: Show binary sizes
+        working-directory: polkadot-sdk
+        run: |
+          ls -lh target/release/revive-dev-node
+          ls -lh target/release/pallet-revive-eth-rpc
+
+      - name: Upload Linux binaries
         uses: actions/upload-artifact@v4
         with:
-          name: revive-binaries-windows
+          name: revive-binaries-linux
           path: |
-            polkadot-sdk/target/release/revive-dev-node.exe
-            polkadot-sdk/target/release/pallet-revive-eth-rpc.exe
+            polkadot-sdk/target/release/revive-dev-node
+            polkadot-sdk/target/release/pallet-revive-eth-rpc
           retention-days: 7
