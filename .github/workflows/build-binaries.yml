@@ -35,16 +35,37 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y llvm-dev libclang-dev clang protobuf-compiler cmake pkg-config libssl-dev
-          # Dynamically find libclang — works regardless of LLVM version on the runner
-          CLANG_LIB=$(dirname $(find /usr/lib -name 'libclang.so*' 2>/dev/null | head -n1))
-          if [ -z "$CLANG_LIB" ]; then
-            echo "ERROR: libclang.so not found after install"
+
+          # Primary: use llvm-config to find the lib directory
+          CLANG_LIB=$(llvm-config --libdir 2>/dev/null || true)
+
+          # Fallback: search for any libclang shared library
+          # Matches libclang.so, libclang.so.14, libclang-17.so, libclang-18.so.1, etc.
+          if [ -z "$CLANG_LIB" ] || [ ! -d "$CLANG_LIB" ]; then
+            CLANG_LIB=$(dirname "$(find /usr/lib -name 'libclang*.so*' 2>/dev/null | head -n1)" 2>/dev/null || true)
+          fi
+
+          if [ -z "$CLANG_LIB" ] || [ ! -d "$CLANG_LIB" ]; then
+            echo "ERROR: Could not find libclang directory"
+            echo "Installed clang files:"
+            dpkg -L libclang-dev 2>/dev/null || true
+            find /usr/lib -name '*clang*' 2>/dev/null || true
             exit 1
           fi
+
+          # clang-sys looks for libclang.so — create symlink if only versioned lib exists
+          if [ ! -f "$CLANG_LIB/libclang.so" ]; then
+            VERSIONED=$(find "$CLANG_LIB" -maxdepth 1 \( -name 'libclang-*.so' -o -name 'libclang.so.*' \) 2>/dev/null | head -n1)
+            if [ -n "$VERSIONED" ]; then
+              sudo ln -sf "$VERSIONED" "$CLANG_LIB/libclang.so"
+              echo "Created symlink: $CLANG_LIB/libclang.so -> $VERSIONED"
+            fi
+          fi
+
           echo "LIBCLANG_PATH=$CLANG_LIB" >> $GITHUB_ENV
           echo "LLVM_CONFIG_PATH=$(which llvm-config)" >> $GITHUB_ENV
           echo "Found libclang at: $CLANG_LIB"
-          # Verify protoc version (polkadot-sdk needs >= 3.x)
+          ls -la "$CLANG_LIB"/libclang* || true
           protoc --version
 
       - name: Use stable Rust (pre-installed)
