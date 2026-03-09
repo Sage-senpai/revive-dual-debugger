@@ -134,7 +134,14 @@ export class ContractDeployer {
         }
       }
 
-      const combined: SolcCombinedOutput = JSON.parse(stdout);
+      let combined: SolcCombinedOutput;
+      try {
+        combined = JSON.parse(stdout);
+      } catch {
+        throw new Error(
+          `solc produced invalid JSON output. First 200 chars: ${stdout.slice(0, 200)}`
+        );
+      }
       const key = Object.keys(combined.contracts).find(k =>
         k.includes(contractName)
       );

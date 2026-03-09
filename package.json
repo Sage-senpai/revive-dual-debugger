@@ -3,7 +3,7 @@
   "displayName": "ReviveDualDebugger",
   "description": "Dual-VM debugger for Polkadot Revive pallet — REVM (EVM) and PolkaVM (RISC-V) side-by-side with Gas vs Weight comparison",
   "version": "0.1.0",
-  "publisher": "polkadot-tools, Sage Senpeak",
+  "publisher": "sage-senpeak",
   "icon": "media/revive-icon.png",
   "engines": {
     "vscode": "^1.85.0"
@@ -14,17 +14,7 @@
     "type": "git",
     "url": "https://github.com/sage-senpeak/revive-dual-debugger"
   },
-  "activationEvents": [
-    "onDebugResolve:revive",
-    "onDebugDynamicConfigurations:revive",
-    "onCommand:revive.switchToREVM",
-    "onCommand:revive.switchToPVM",
-    "onCommand:revive.deployAndDebug",
-    "onCommand:revive.openDualTrace",
-    "onCommand:revive.compileContract",
-    "onCommand:revive.startNode",
-    "onCommand:revive.stopNode"
-  ],
+  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -250,7 +240,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile:dev",
+    "vscode:prepublish": "npm run compile",
     "compile": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode production",
     "compile:dev": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode development",
     "watch": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode development --watch",

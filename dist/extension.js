@@ -4962,7 +4962,13 @@ class ContractDeployer {
                         'Ensure solc is installed: npm install -g solc');
                 }
             }
-            const combined = JSON.parse(stdout);
+            let combined;
+            try {
+                combined = JSON.parse(stdout);
+            }
+            catch {
+                throw new Error(`solc produced invalid JSON output. First 200 chars: ${stdout.slice(0, 200)}`);
+            }
             const key = Object.keys(combined.contracts).find(k => k.includes(contractName));
             if (!key) {
                 const available = Object.keys(combined.contracts).join(', ');

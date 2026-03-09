@@ -35,10 +35,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y llvm-dev libclang-dev clang protobuf-compiler cmake pkg-config libssl-dev
-          CLANG_LIB=$(dirname $(find /usr/lib -name 'libclang.so*' | head -n1))
+          # Dynamically find libclang — works regardless of LLVM version on the runner
+          CLANG_LIB=$(dirname $(find /usr/lib -name 'libclang.so*' 2>/dev/null | head -n1))
+          if [ -z "$CLANG_LIB" ]; then
+            echo "ERROR: libclang.so not found after install"
+            exit 1
+          fi
           echo "LIBCLANG_PATH=$CLANG_LIB" >> $GITHUB_ENV
           echo "LLVM_CONFIG_PATH=$(which llvm-config)" >> $GITHUB_ENV
           echo "Found libclang at: $CLANG_LIB"
+          # Verify protoc version (polkadot-sdk needs >= 3.x)
+          protoc --version
 
       - name: Use stable Rust (pre-installed)
         run: |
@@ -48,12 +55,12 @@ jobs:
       - name: Build revive-dev-node
         working-directory: polkadot-sdk
         run: cargo build -p revive-dev-node --release
-        timeout-minutes: 90
+        timeout-minutes: 120
 
       - name: Build pallet-revive-eth-rpc
         working-directory: polkadot-sdk
         run: cargo build -p pallet-revive-eth-rpc --release
-        timeout-minutes: 30
+        timeout-minutes: 60
 
       - name: Show binary sizes
         working-directory: polkadot-sdk
