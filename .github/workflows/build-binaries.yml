@@ -71,6 +71,7 @@ jobs:
       - name: Use stable Rust (pre-installed)
         run: |
           rustup default stable
+          rustup target add wasm32-unknown-unknown
           rustup show
 
       - name: Build revive-dev-node
