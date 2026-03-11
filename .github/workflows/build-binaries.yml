@@ -72,6 +72,7 @@ jobs:
         run: |
           rustup default stable
           rustup target add wasm32-unknown-unknown
+          rustup component add rust-src
           rustup show
 
       - name: Build revive-dev-node
