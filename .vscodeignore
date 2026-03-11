@@ -1,0 +1,17 @@
+.vscode/**
+.github/**
+src/**
+node_modules/**
+out/**
+*.ts
+!dist/**
+!bin/**
+!media/**
+!examples/**
+!package.json
+!README.md
+!LICENSE
+tsconfig.json
+webpack.config.js
+.eslintrc*
+.gitignore

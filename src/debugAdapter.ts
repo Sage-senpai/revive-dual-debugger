@@ -40,6 +40,7 @@ import { PvmConnector } from './pvmConnector';
 import { SourceMapper } from './sourceMapper';
 import { WeightMeter } from './weightMeter';
 import { ContractDeployer } from './contractDeployer';
+import { resolveBinaryPath } from './binaryResolver';
 
 // ─── Launch Arguments ─────────────────────────────────────────────────────────
 
@@ -130,6 +131,14 @@ export class ReviveDebugSession extends LoggingDebugSession {
   ): Promise<void> {
     this.launchArgs = { ...DEFAULT_ARGS, ...args } as LaunchRequestArguments;
     this.currentBackend = this.launchArgs.backend;
+
+    // Resolve binary paths: bundled bin/<platform>/ → system PATH fallback
+    // debugAdapter.js runs from dist/, so extension root is one level up
+    const extensionDir = path.resolve(__dirname, '..');
+    this.launchArgs.nodePath = resolveBinaryPath('revive-dev-node', this.launchArgs.nodePath, extensionDir);
+    this.launchArgs.ethRpcPath = resolveBinaryPath('eth-rpc', this.launchArgs.ethRpcPath, extensionDir);
+    this.launchArgs.solcPath = resolveBinaryPath('solc', this.launchArgs.solcPath, extensionDir);
+    this.launchArgs.resolcPath = resolveBinaryPath('resolc', this.launchArgs.resolcPath, extensionDir);
 
     try {
       // 1. Start local dev node if requested

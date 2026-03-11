@@ -245,7 +245,8 @@
     "compile:dev": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode development",
     "watch": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode development --watch",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "download-binaries": "bash scripts/download-binaries.sh"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

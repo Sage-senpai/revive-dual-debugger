@@ -10,6 +10,7 @@ import * as path from 'path';
 import { NodeOrchestrator, NodeOrchestratorConfig } from './nodeOrchestrator';
 import { DualTracePanel } from './webview/dualTracePanel';
 import { WeightMeter } from './weightMeter';
+import { resolveBinaryPath } from './binaryResolver';
 
 // Shared orchestrator instance (persists across debug sessions)
 let orchestrator: NodeOrchestrator | null = null;
@@ -127,9 +128,10 @@ async function startNodeCommand(context: vscode.ExtensionContext): Promise<void>
     return;
   }
 
+  const extDir = context.extensionPath;
   const orchConfig: NodeOrchestratorConfig = {
-    nodePath: config.get('nodePath', 'revive-dev-node'),
-    ethRpcPath: config.get('ethRpcPath', 'pallet-revive-eth-rpc'),
+    nodePath: resolveBinaryPath('revive-dev-node', config.get('nodePath'), extDir),
+    ethRpcPath: resolveBinaryPath('eth-rpc', config.get('ethRpcPath'), extDir),
     ethRpcUrl: `http://localhost:${config.get('ethRpcPort', 8545)}`,
     substrateUrl: `ws://localhost:${config.get('substratePort', 9944)}`,
     enableStrace: true,
