@@ -85,11 +85,16 @@ jobs:
         run: cargo build -p pallet-revive-eth-rpc --release
         timeout-minutes: 60
 
-      - name: Show binary sizes
+      - name: Find built binaries
         working-directory: polkadot-sdk
         run: |
+          echo "--- All ELF executables in target/release (no deps): ---"
+          find target/release -maxdepth 1 -type f -executable ! -name '*.d' ! -name '*.so' | sort
+          echo "---"
+          # Verify the two binaries we need
           ls -lh target/release/revive-dev-node
-          ls -lh target/release/pallet-revive-eth-rpc
+          # eth-rpc binary comes from the pallet-revive-eth-rpc crate
+          ls -lh target/release/eth-rpc
 
       - name: Upload Linux binaries
         uses: actions/upload-artifact@v4
@@ -97,5 +102,5 @@ jobs:
           name: revive-binaries-linux
           path: |
             polkadot-sdk/target/release/revive-dev-node
-            polkadot-sdk/target/release/pallet-revive-eth-rpc
+            polkadot-sdk/target/release/eth-rpc
           retention-days: 7
