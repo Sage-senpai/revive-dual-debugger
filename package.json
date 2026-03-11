@@ -8,8 +8,20 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Debuggers", "Other"],
-  "keywords": ["polkadot", "solidity", "revive", "polkavm", "evm", "debugging", "blockchain", "substrate"],
+  "categories": [
+    "Debuggers",
+    "Other"
+  ],
+  "keywords": [
+    "polkadot",
+    "solidity",
+    "revive",
+    "polkavm",
+    "evm",
+    "debugging",
+    "blockchain",
+    "substrate"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/sage-senpeak/revive-dual-debugger"
@@ -60,10 +72,14 @@
         "label": "Revive Dual Debugger",
         "program": "./dist/debugAdapter.js",
         "runtime": "node",
-        "languages": ["solidity"],
+        "languages": [
+          "solidity"
+        ],
         "configurationAttributes": {
           "launch": {
-            "required": ["contractFile"],
+            "required": [
+              "contractFile"
+            ],
             "properties": {
               "contractFile": {
                 "type": "string",
@@ -72,7 +88,11 @@
               },
               "backend": {
                 "type": "string",
-                "enum": ["REVM", "PVM", "BOTH"],
+                "enum": [
+                  "REVM",
+                  "PVM",
+                  "BOTH"
+                ],
                 "description": "Execution backend: REVM (EVM), PVM (PolkaVM), or BOTH for dual trace",
                 "default": "BOTH"
               },
@@ -199,7 +219,11 @@
         },
         "revive.defaultBackend": {
           "type": "string",
-          "enum": ["REVM", "PVM", "BOTH"],
+          "enum": [
+            "REVM",
+            "PVM",
+            "BOTH"
+          ],
           "default": "BOTH",
           "description": "Default execution backend for new debug sessions"
         },
@@ -246,13 +270,16 @@
     "watch": "node --max-old-space-size=4096 node_modules/webpack/bin/webpack.js --mode development --watch",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
-    "download-binaries": "bash scripts/download-binaries.sh"
+    "download-binaries": "bash scripts/download-binaries.sh",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
-    "@types/ws": "^8.5.10",
     "@types/webpack": "^5.28.5",
+    "@types/ws": "^8.5.10",
+    "@vscode/vsce": "^3.7.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.3.3",
     "webpack": "^5.90.0",
