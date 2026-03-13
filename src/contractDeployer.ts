@@ -19,6 +19,24 @@ import { BackendType } from './backendConnector';
 
 const execFileAsync = promisify(execFile);
 
+/**
+ * On Windows, wrap Linux tool invocations in `wsl -d Ubuntu --`.
+ * Converts Windows paths like C:\...\bin\linux\resolc to /mnt/c/.../bin/linux/resolc.
+ */
+function wslExec(
+  binPath: string,
+  args: string[],
+  opts: { maxBuffer: number }
+): Promise<{ stdout: string; stderr: string }> {
+  if (process.platform !== 'win32') {
+    return execFileAsync(binPath, args, opts);
+  }
+  const wslPath = binPath.startsWith('/')
+    ? binPath
+    : binPath.replace(/\\/g, '/').replace(/^([A-Za-z]):\//, (_m, d: string) => `/mnt/${d.toLowerCase()}/`);
+  return execFileAsync('wsl', ['-d', 'Ubuntu', '--', wslPath, ...args], opts);
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface DeployerConfig {
@@ -117,7 +135,7 @@ export class ContractDeployer {
 
       let stdout = '';
       try {
-        const result = await execFileAsync(this.config.solcPath, args, {
+        const result = await wslExec(this.config.solcPath, args, {
           maxBuffer: 50 * 1024 * 1024  // 50MB
         });
         stdout = result.stdout;
@@ -183,7 +201,7 @@ export class ContractDeployer {
       ];
 
       try {
-        await execFileAsync(this.config.resolcPath, args, {
+        await wslExec(this.config.resolcPath, args, {
           maxBuffer: 50 * 1024 * 1024
         });
       } catch (err: unknown) {

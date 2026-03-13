@@ -8,9 +8,38 @@
  * Health-checks via eth_blockNumber and emits structured events.
  */
 
-import { ChildProcess, spawn } from 'child_process';
+import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import { EventEmitter } from 'events';
 import * as http from 'http';
+
+// ─── WSL helpers (Windows-only) ───────────────────────────────────────────────
+
+/**
+ * On Windows, Linux binaries must run inside WSL.
+ * Converts a Windows path like C:\Users\...\bin\linux\eth-rpc
+ * to its WSL mount path /mnt/c/Users/.../bin/linux/eth-rpc,
+ * then wraps the call as: spawn('wsl', ['-d', 'Ubuntu', '--', <wslPath>, ...args])
+ */
+function wslSpawn(
+  binPath: string,
+  args: string[],
+  options: SpawnOptions
+): ChildProcess {
+  if (process.platform !== 'win32') {
+    return spawn(binPath, args, options);
+  }
+  const wslPath = toWslPath(binPath);
+  return spawn('wsl', ['-d', 'Ubuntu', '--', wslPath, ...args], options);
+}
+
+function toWslPath(winPath: string): string {
+  // Already a WSL path
+  if (winPath.startsWith('/')) return winPath;
+  // C:\Users\... → /mnt/c/Users/...
+  return winPath
+    .replace(/\\/g, '/')
+    .replace(/^([A-Za-z]):\//, (_m, d: string) => `/mnt/${d.toLowerCase()}/`);
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -122,7 +151,7 @@ export class NodeOrchestrator extends EventEmitter {
         `Spawning: ${this.config.nodePath} ${args.join(' ')}`
       ));
 
-      this.substrateProcess = spawn(this.config.nodePath, args, {
+      this.substrateProcess = wslSpawn(this.config.nodePath, args, {
         env,
         stdio: ['ignore', 'pipe', 'pipe']
       });
@@ -218,7 +247,7 @@ export class NodeOrchestrator extends EventEmitter {
   // ─── Eth-RPC Adapter ───────────────────────────────────────────────────────
 
   private startEthRpc(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const args = ['--dev'];
 
       this.emit('log', this.makeLog(
@@ -226,7 +255,7 @@ export class NodeOrchestrator extends EventEmitter {
         `Starting Ethereum RPC adapter at ${this.config.ethRpcUrl}`
       ));
 
-      this.ethRpcProcess = spawn(this.config.ethRpcPath, args, {
+      this.ethRpcProcess = wslSpawn(this.config.ethRpcPath, args, {
         env: { ...process.env, RUST_LOG: 'pallet_revive_eth_rpc=info,error' },
         stdio: ['ignore', 'pipe', 'pipe']
       });
@@ -335,7 +364,7 @@ export class NodeOrchestrator extends EventEmitter {
 
   // ─── Kill Helper ───────────────────────────────────────────────────────────
 
-  private killProcess(proc: ChildProcess | null, name: string): Promise<void> {
+  private killProcess(proc: ChildProcess | null, _name: string): Promise<void> {
     if (!proc || proc.killed) {
       return Promise.resolve();
     }
