@@ -20,21 +20,30 @@ import { BackendType } from './backendConnector';
 const execFileAsync = promisify(execFile);
 
 /**
- * On Windows, wrap Linux tool invocations in `wsl -d Ubuntu --`.
- * Converts Windows paths like C:\...\bin\linux\resolc to /mnt/c/.../bin/linux/resolc.
+ * On Windows, wrap Linux tool invocations in `wsl -d Ubuntu -- env PATH=... <bin> <args>`.
+ * Converts Windows paths to their /mnt/<drive>/... WSL equivalents.
+ * extraPath entries are prepended to PATH inside WSL so resolc can find solc.
  */
+function toWslPath(p: string): string {
+  if (p.startsWith('/')) return p;
+  return p.replace(/\\/g, '/').replace(/^([A-Za-z]):\//, (_m, d: string) => `/mnt/${d.toLowerCase()}/`);
+}
+
 function wslExec(
   binPath: string,
   args: string[],
-  opts: { maxBuffer: number }
+  opts: { maxBuffer: number },
+  extraPath?: string
 ): Promise<{ stdout: string; stderr: string }> {
   if (process.platform !== 'win32') {
-    return execFileAsync(binPath, args, opts);
+    const env = extraPath ? { ...process.env, PATH: `${extraPath}:${process.env.PATH}` } : process.env;
+    return execFileAsync(binPath, args, { ...opts, env });
   }
-  const wslPath = binPath.startsWith('/')
-    ? binPath
-    : binPath.replace(/\\/g, '/').replace(/^([A-Za-z]):\//, (_m, d: string) => `/mnt/${d.toLowerCase()}/`);
-  return execFileAsync('wsl', ['-d', 'Ubuntu', '--', wslPath, ...args], opts);
+  const wslBin = toWslPath(binPath);
+  const cmdArgs = extraPath
+    ? ['-d', 'Ubuntu', '--', 'env', `PATH=${extraPath}:/usr/local/bin:/usr/bin:/bin`, wslBin, ...args]
+    : ['-d', 'Ubuntu', '--', wslBin, ...args];
+  return execFileAsync('wsl', cmdArgs, opts);
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -200,10 +209,12 @@ export class ContractDeployer {
         contractFile
       ];
 
+      // resolc shells out to `solc` — ensure solc's directory is on PATH
+      const solcDir = path.dirname(this.config.solcPath);
       try {
         await wslExec(this.config.resolcPath, args, {
           maxBuffer: 50 * 1024 * 1024
-        });
+        }, solcDir);
       } catch (err: unknown) {
         const execErr = err as { stderr?: string; message?: string };
         throw new Error(

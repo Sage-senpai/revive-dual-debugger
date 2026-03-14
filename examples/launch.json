@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Contract (REVM + PVM)",
+      "type": "revive",
+      "request": "launch",
+      "program": "${workspaceFolder}/Counter.sol",
+      "contractName": "Counter",
+      "backend": "BOTH",
+      "autoStartNode": true,
+      "ethRpcUrl": "http://127.0.0.1:8545",
+      "substrateUrl": "ws://127.0.0.1:9944",
+      "solcPath": "/home/sage/bin/solc",
+      "resolcPath": "/home/sage/bin/resolc",
+      "constructorArgs": [],
+      "trace": false
+    },
+    {
+      "name": "Debug Contract (REVM only)",
+      "type": "revive",
+      "request": "launch",
+      "program": "${workspaceFolder}/Counter.sol",
+      "contractName": "Counter",
+      "backend": "REVM",
+      "autoStartNode": true,
+      "ethRpcUrl": "http://127.0.0.1:8545",
+      "substrateUrl": "ws://127.0.0.1:9944",
+      "solcPath": "/home/sage/bin/solc",
+      "resolcPath": "/home/sage/bin/resolc",
+      "constructorArgs": [],
+      "trace": false
+    }
+  ]
+}
