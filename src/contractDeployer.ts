@@ -134,12 +134,16 @@ export class ContractDeployer {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'revive-solc-'));
     const outputFile = path.join(tmpDir, 'output.json');
 
+    // On Windows, solc runs inside WSL — convert paths to /mnt/... equivalents
+    const wslContractFile = process.platform === 'win32' ? toWslPath(contractFile) : contractFile;
+    const wslTmpDir = process.platform === 'win32' ? toWslPath(tmpDir) : tmpDir;
+
     try {
       const args = [
         '--combined-json', 'abi,bin,bin-runtime,srcmap,srcmap-runtime',
         '--optimize',
-        '--output-dir', tmpDir,
-        contractFile
+        '--output-dir', wslTmpDir,
+        wslContractFile
       ];
 
       let stdout = '';
@@ -201,12 +205,15 @@ export class ContractDeployer {
   ): Promise<PvmArtifact> {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'revive-resolc-'));
 
+    const wslContractFile = process.platform === 'win32' ? toWslPath(contractFile) : contractFile;
+    const wslTmpDir = process.platform === 'win32' ? toWslPath(tmpDir) : tmpDir;
+
     try {
       const args = [
         '--bin',
         '--abi',
-        '--output-dir', tmpDir,
-        contractFile
+        '--output-dir', wslTmpDir,
+        wslContractFile
       ];
 
       // resolc shells out to `solc` — ensure solc's directory is on PATH
