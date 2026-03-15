@@ -165,9 +165,13 @@ export class ContractDeployer {
         }
       }
 
+      // solc prints warnings to stdout before the JSON — strip everything before the first '{'
+      const jsonStart = stdout.indexOf('{');
+      const jsonStr = jsonStart >= 0 ? stdout.slice(jsonStart) : stdout;
+
       let combined: SolcCombinedOutput;
       try {
-        combined = JSON.parse(stdout);
+        combined = JSON.parse(jsonStr);
       } catch {
         throw new Error(
           `solc produced invalid JSON output. First 200 chars: ${stdout.slice(0, 200)}`
