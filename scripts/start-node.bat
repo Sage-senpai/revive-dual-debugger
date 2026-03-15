@@ -8,7 +8,7 @@ start "revive-dev-node" wsl -d Ubuntu bash -c "/mnt/c/Users/USER/RevdDebugger/bi
 echo Waiting for node to start on port 9944...
 :WAIT_NODE
 timeout /t 2 /nobreak >nul
-wsl -d Ubuntu bash -c "curl -sf http://127.0.0.1:9944 -o /dev/null -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"method\":\"system_health\",\"params\":[],\"id\":1}'" >nul 2>&1
+powershell -Command "try { Invoke-RestMethod -Method Post -Uri http://localhost:9944 -ContentType 'application/json' -Body '{\"jsonrpc\":\"2.0\",\"method\":\"system_health\",\"params\":[],\"id\":1}' | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 if errorlevel 1 goto WAIT_NODE
 echo Node is up!
 
@@ -18,7 +18,7 @@ start "eth-rpc" wsl -d Ubuntu bash -c "/mnt/c/Users/USER/RevdDebugger/bin/linux/
 echo Waiting for eth-rpc to start on port 8545...
 :WAIT_RPC
 timeout /t 2 /nobreak >nul
-wsl -d Ubuntu bash -c "curl -sf http://127.0.0.1:8545 -o /dev/null -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}'" >nul 2>&1
+powershell -Command "try { Invoke-RestMethod -Method Post -Uri http://localhost:8545 -ContentType 'application/json' -Body '{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}' | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 if errorlevel 1 goto WAIT_RPC
 echo eth-rpc is up!
 
