@@ -130,6 +130,12 @@ export class ReviveDebugSession extends LoggingDebugSession {
     args: LaunchRequestArguments
   ): Promise<void> {
     this.launchArgs = { ...DEFAULT_ARGS, ...args } as LaunchRequestArguments;
+    // Accept both "contractFile" and DAP standard "program" from launch.json
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rawArgs = args as any;
+    if (!this.launchArgs.contractFile && rawArgs.program) {
+      this.launchArgs.contractFile = rawArgs.program;
+    }
     this.currentBackend = this.launchArgs.backend;
 
     // Resolve binary paths: bundled bin/<platform>/ → system PATH fallback
