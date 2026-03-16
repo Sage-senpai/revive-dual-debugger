@@ -35,15 +35,16 @@ function wslExec(
   opts: { maxBuffer: number },
   extraPath?: string
 ): Promise<{ stdout: string; stderr: string }> {
+  const encoding = 'utf8' as const;
   if (process.platform !== 'win32') {
     const env = extraPath ? { ...process.env, PATH: `${extraPath}:${process.env.PATH}` } : process.env;
-    return execFileAsync(binPath, args, { ...opts, env });
+    return execFileAsync(binPath, args, { ...opts, env, encoding });
   }
   const wslBin = toWslPath(binPath);
   const cmdArgs = extraPath
     ? ['-d', 'Ubuntu', '--', 'env', `PATH=${extraPath}:/usr/local/bin:/usr/bin:/bin`, wslBin, ...args]
     : ['-d', 'Ubuntu', '--', wslBin, ...args];
-  return execFileAsync('wsl', cmdArgs, opts);
+  return execFileAsync('wsl', cmdArgs, { ...opts, encoding });
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -142,7 +143,6 @@ export class ContractDeployer {
       const args = [
         '--combined-json', 'abi,bin,bin-runtime,srcmap,srcmap-runtime',
         '--optimize',
-        '--output-dir', wslTmpDir,
         wslContractFile
       ];
 
